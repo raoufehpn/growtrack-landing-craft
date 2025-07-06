@@ -68,6 +68,12 @@ const Pricing = () => {
     }
   ];
 
+  const handlePlanSelection = (planName: string) => {
+    // For regular users, this would handle payment/subscription
+    console.log(`Selected plan: ${planName}`);
+    // In a real app, you would redirect to payment or show subscription modal
+  };
+
   return (
     <section id="pricing" className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -126,6 +132,7 @@ const Pricing = () => {
                     variant={plan.buttonVariant} 
                     size="lg" 
                     className="w-full"
+                    onClick={() => handlePlanSelection(plan.name)}
                   >
                     {plan.buttonText}
                   </Button>

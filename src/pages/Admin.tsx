@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,10 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { User, Session } from '@supabase/supabase-js';
-import { ArrowLeft, Users, BarChart3, Settings, LogOut, Edit, Save, X, Shield, UserCheck, Activity } from 'lucide-react';
+import { ArrowLeft, Users, BarChart3, Settings, LogOut, Edit, Save, X, Shield, UserCheck, Activity, DollarSign } from 'lucide-react';
+import PricingManager from '@/components/PricingManager';
 
 interface Profile {
   id: string;
@@ -28,19 +29,84 @@ interface SiteSettings {
   maintenanceMode: boolean;
 }
 
+interface PricingPlan {
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  buttonText: string;
+  popular: boolean;
+}
+
 const Admin = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingProfile, setEditingProfile] = useState<string | null>(null);
+  const [activeUsersCount, setActiveUsersCount] = useState(0);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({
     siteName: 'GrowTrack',
     siteDescription: 'Transform your business with smart analytics',
     contactEmail: 'contact@growtrack.com',
     maintenanceMode: false
   });
-  const [activeUsersCount, setActiveUsersCount] = useState(0);
+  const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([
+    {
+      name: "Starter",
+      price: "$29",
+      period: "/month",
+      description: "Perfect for small teams getting started with analytics",
+      features: [
+        "Up to 5 team members",
+        "10,000 data points/month",
+        "Basic dashboards",
+        "Email support",
+        "Standard integrations",
+        "Mobile app access"
+      ],
+      buttonText: "Start Free Trial",
+      popular: false
+    },
+    {
+      name: "Professional",
+      price: "$99",
+      period: "/month",
+      description: "Advanced features for growing businesses",
+      features: [
+        "Up to 25 team members",
+        "100,000 data points/month",
+        "Advanced dashboards",
+        "Priority support",
+        "All integrations",
+        "Custom reports",
+        "API access",
+        "Advanced analytics"
+      ],
+      buttonText: "Get Started",
+      popular: true
+    },
+    {
+      name: "Enterprise",
+      price: "$299",
+      period: "/month",
+      description: "Full-scale solution for large organizations",
+      features: [
+        "Unlimited team members",
+        "Unlimited data points",
+        "Custom dashboards",
+        "24/7 phone support",
+        "White-label solution",
+        "Advanced security",
+        "Custom integrations",
+        "Dedicated account manager",
+        "On-premise deployment",
+        "SLA guarantee"
+      ],
+      buttonText: "Contact Sales",
+      popular: false
+    }
+  ]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -115,6 +181,12 @@ const Admin = () => {
   const saveSiteSettings = () => {
     // In a real app, you'd save these to a database
     console.log('Site settings saved:', siteSettings);
+  };
+
+  const handleSavePricing = (updatedPlans: PricingPlan[]) => {
+    setPricingPlans(updatedPlans);
+    // In a real app, you'd save these to a database
+    console.log('Pricing plans updated:', updatedPlans);
   };
 
   if (!user) {
@@ -218,21 +290,27 @@ const Admin = () => {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">System Status</CardTitle>
-              <BarChart3 className="w-4 h-4 text-accent" />
+              <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+              <DollarSign className="w-4 h-4 text-accent" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-500">Online</div>
+              <div className="text-2xl font-bold">$12,847</div>
               <p className="text-xs text-muted-foreground">
-                All systems operational
+                +15% from last month
               </p>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-          {/* Users Table */}
-          <div className="xl:col-span-2">
+        <Tabs defaultValue="users" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="pricing">Pricing</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="users" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>User Management</CardTitle>
@@ -308,10 +386,13 @@ const Admin = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
 
-          {/* Site Settings */}
-          <div>
+          <TabsContent value="pricing" className="space-y-6">
+            <PricingManager plans={pricingPlans} onSavePlans={handleSavePricing} />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Site Settings</CardTitle>
@@ -359,8 +440,36 @@ const Admin = () => {
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Growth</CardTitle>
+                  <CardDescription>Monthly user registration trends</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-32 flex items-center justify-center text-foreground/70">
+                    Chart placeholder - User growth over time
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Revenue Analytics</CardTitle>
+                  <CardDescription>Monthly revenue and subscription metrics</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-32 flex items-center justify-center text-foreground/70">
+                    Chart placeholder - Revenue analytics
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
