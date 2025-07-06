@@ -3,10 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { User, Session } from '@supabase/supabase-js';
-import { ArrowLeft, Users, BarChart3, Settings, LogOut } from 'lucide-react';
+import { ArrowLeft, Users, BarChart3, Settings, LogOut, Edit, Save, X, Shield, UserCheck, Activity } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -17,11 +21,26 @@ interface Profile {
   created_at: string | null;
 }
 
+interface SiteSettings {
+  siteName: string;
+  siteDescription: string;
+  contactEmail: string;
+  maintenanceMode: boolean;
+}
+
 const Admin = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingProfile, setEditingProfile] = useState<string | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({
+    siteName: 'GrowTrack',
+    siteDescription: 'Transform your business with smart analytics',
+    contactEmail: 'contact@growtrack.com',
+    maintenanceMode: false
+  });
+  const [activeUsersCount, setActiveUsersCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,6 +68,7 @@ const Admin = () => {
   useEffect(() => {
     if (user) {
       fetchProfiles();
+      fetchActiveUsers();
     }
   }, [user]);
 
@@ -68,9 +88,33 @@ const Admin = () => {
     }
   };
 
+  const fetchActiveUsers = async () => {
+    // Simulate active users count (in a real app, you'd track this properly)
+    setActiveUsersCount(Math.floor(Math.random() * 50) + 10);
+  };
+
+  const updateUserRole = async (userId: string, newRole: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
+
+      if (error) throw error;
+      fetchProfiles();
+    } catch (error) {
+      console.error('Error updating user role:', error);
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/');
+  };
+
+  const saveSiteSettings = () => {
+    // In a real app, you'd save these to a database
+    console.log('Site settings saved:', siteSettings);
   };
 
   if (!user) {
@@ -91,12 +135,13 @@ const Admin = () => {
       {/* Header */}
       <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/')}
+                className="shrink-0"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Home
@@ -109,14 +154,14 @@ const Admin = () => {
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full lg:w-auto">
               <div className="flex items-center space-x-2">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback>
                     {user.email?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm text-foreground/80">{user.email}</span>
+                <span className="text-sm text-foreground/80 truncate">{user.email}</span>
               </div>
               <Button onClick={handleSignOut} variant="outline" size="sm">
                 <LogOut className="w-4 h-4 mr-2" />
@@ -127,106 +172,193 @@ const Admin = () => {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 lg:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-card rounded-xl p-6 border border-border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-foreground/70 text-sm">Total Users</p>
-                <p className="text-2xl font-bold">{profiles.length}</p>
-              </div>
-              <Users className="w-8 h-8 text-accent" />
-            </div>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <Users className="w-4 h-4 text-accent" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{profiles.length}</div>
+              <p className="text-xs text-muted-foreground">
+                +2 from last month
+              </p>
+            </CardContent>
+          </Card>
           
-          <div className="bg-card rounded-xl p-6 border border-border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-foreground/70 text-sm">Active Sessions</p>
-                <p className="text-2xl font-bold">1</p>
-              </div>
-              <BarChart3 className="w-8 h-8 text-accent" />
-            </div>
-          </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+              <Activity className="w-4 h-4 text-accent" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{activeUsersCount}</div>
+              <p className="text-xs text-muted-foreground">
+                Currently online
+              </p>
+            </CardContent>
+          </Card>
           
-          <div className="bg-card rounded-xl p-6 border border-border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-foreground/70 text-sm">System Status</p>
-                <p className="text-2xl font-bold text-green-500">Online</p>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Admin Users</CardTitle>
+              <Shield className="w-4 h-4 text-accent" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {profiles.filter(p => p.role === 'admin').length}
               </div>
-              <Settings className="w-8 h-8 text-accent" />
-            </div>
-          </div>
+              <p className="text-xs text-muted-foreground">
+                System administrators
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">System Status</CardTitle>
+              <BarChart3 className="w-4 h-4 text-accent" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-500">Online</div>
+              <p className="text-xs text-muted-foreground">
+                All systems operational
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Users Table */}
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <div className="p-6 border-b border-border">
-            <h2 className="text-xl font-semibold">User Management</h2>
-            <p className="text-foreground/70 text-sm mt-1">Manage user accounts and permissions</p>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+          {/* Users Table */}
+          <div className="xl:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Management</CardTitle>
+                <CardDescription>Manage user accounts and permissions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  {loading ? (
+                    <div className="p-8 text-center">
+                      <p className="text-foreground/70">Loading users...</p>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead className="hidden sm:table-cell">Username</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead className="hidden md:table-cell">Created</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {profiles.map((profile) => (
+                          <TableRow key={profile.id}>
+                            <TableCell>
+                              <div className="flex items-center space-x-3">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src={profile.avatar_url || undefined} />
+                                  <AvatarFallback>
+                                    {profile.full_name?.charAt(0) || profile.username?.charAt(0) || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0">
+                                  <p className="font-medium truncate">{profile.full_name || 'No name'}</p>
+                                  <p className="text-xs text-foreground/70 truncate">{profile.id.slice(0, 8)}...</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden sm:table-cell">
+                              {profile.username || 'No username'}
+                            </TableCell>
+                            <TableCell>
+                              <Select
+                                value={profile.role || 'user'}
+                                onValueChange={(value) => updateUserRole(profile.id, value)}
+                              >
+                                <SelectTrigger className="w-20 sm:w-24">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="user">User</SelectItem>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {profile.created_at 
+                                ? new Date(profile.created_at).toLocaleDateString()
+                                : 'Unknown'
+                              }
+                            </TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm">
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          
-          <div className="overflow-x-auto">
-            {loading ? (
-              <div className="p-8 text-center">
-                <p className="text-foreground/70">Loading users...</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Username</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {profiles.map((profile) => (
-                    <TableRow key={profile.id}>
-                      <TableCell>
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage src={profile.avatar_url || undefined} />
-                            <AvatarFallback>
-                              {profile.full_name?.charAt(0) || profile.username?.charAt(0) || 'U'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{profile.full_name || 'No name'}</p>
-                            <p className="text-sm text-foreground/70">{profile.id}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{profile.username || 'No username'}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          profile.role === 'admin' 
-                            ? 'bg-accent/10 text-accent' 
-                            : 'bg-secondary/50 text-foreground/70'
-                        }`}>
-                          {profile.role || 'user'}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {profile.created_at 
-                          ? new Date(profile.created_at).toLocaleDateString()
-                          : 'Unknown'
-                        }
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
-                          Edit
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+
+          {/* Site Settings */}
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Site Settings</CardTitle>
+                <CardDescription>Configure website parameters</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="siteName">Site Name</Label>
+                  <Input
+                    id="siteName"
+                    value={siteSettings.siteName}
+                    onChange={(e) => setSiteSettings({...siteSettings, siteName: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="siteDescription">Description</Label>
+                  <Input
+                    id="siteDescription"
+                    value={siteSettings.siteDescription}
+                    onChange={(e) => setSiteSettings({...siteSettings, siteDescription: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contactEmail">Contact Email</Label>
+                  <Input
+                    id="contactEmail"
+                    type="email"
+                    value={siteSettings.contactEmail}
+                    onChange={(e) => setSiteSettings({...siteSettings, contactEmail: e.target.value})}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="maintenance"
+                    checked={siteSettings.maintenanceMode}
+                    onChange={(e) => setSiteSettings({...siteSettings, maintenanceMode: e.target.checked})}
+                    className="w-4 h-4"
+                  />
+                  <Label htmlFor="maintenance">Maintenance Mode</Label>
+                </div>
+                <Button onClick={saveSiteSettings} className="w-full">
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Settings
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

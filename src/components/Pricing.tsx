@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Star } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Check, Zap, Building, Crown } from 'lucide-react';
 
 const Pricing = () => {
   const plans = [
@@ -9,126 +10,138 @@ const Pricing = () => {
       name: "Starter",
       price: "$29",
       period: "/month",
-      description: "Perfect for small businesses and startups",
+      description: "Perfect for small teams getting started with analytics",
+      icon: Zap,
       features: [
-        "Up to 10,000 data points",
-        "5 custom dashboards",
+        "Up to 5 team members",
+        "10,000 data points/month",
+        "Basic dashboards",
         "Email support",
-        "Basic analytics",
-        "7-day data retention"
+        "Standard integrations",
+        "Mobile app access"
       ],
+      buttonText: "Start Free Trial",
+      buttonVariant: "outline" as const,
       popular: false
     },
     {
       name: "Professional",
-      price: "$79",
+      price: "$99",
       period: "/month",
-      description: "Ideal for growing businesses",
+      description: "Advanced features for growing businesses",
+      icon: Building,
       features: [
-        "Up to 100,000 data points",
-        "Unlimited dashboards",
+        "Up to 25 team members",
+        "100,000 data points/month",
+        "Advanced dashboards",
         "Priority support",
-        "Advanced analytics",
-        "30-day data retention",
-        "Team collaboration",
-        "API access"
+        "All integrations",
+        "Custom reports",
+        "API access",
+        "Advanced analytics"
       ],
+      buttonText: "Get Started",
+      buttonVariant: "hero" as const,
       popular: true
     },
     {
       name: "Enterprise",
-      price: "$199",
+      price: "$299",
       period: "/month",
-      description: "For large organizations",
+      description: "Full-scale solution for large organizations",
+      icon: Crown,
       features: [
+        "Unlimited team members",
         "Unlimited data points",
-        "Unlimited dashboards",
+        "Custom dashboards",
         "24/7 phone support",
-        "AI-powered insights",
-        "Unlimited data retention",
-        "Advanced team features",
-        "Full API access",
+        "White-label solution",
+        "Advanced security",
         "Custom integrations",
-        "Dedicated account manager"
+        "Dedicated account manager",
+        "On-premise deployment",
+        "SLA guarantee"
       ],
+      buttonText: "Contact Sales",
+      buttonVariant: "outline" as const,
       popular: false
     }
   ];
 
   return (
-    <section id="pricing" className="py-20">
+    <section id="pricing" className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Simple, Transparent
-            <span className="bg-accent-gradient bg-clip-text text-transparent"> Pricing</span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Simple, <span className="bg-accent-gradient bg-clip-text text-transparent">Transparent</span> Pricing
           </h2>
-          <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
-            Choose the perfect plan for your business. All plans include our core features with no hidden fees.
+          <p className="text-foreground/80 text-lg max-w-2xl mx-auto">
+            Choose the perfect plan for your business. All plans include our core analytics features with no hidden fees.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {plans.map((plan, index) => (
-            <div
-              key={index}
-              className={`relative p-8 rounded-2xl border transition-all duration-500 hover:scale-105 animate-fade-in ${
-                plan.popular
-                  ? 'bg-accent-gradient border-accent shadow-glow'
-                  : 'bg-card border-border hover:shadow-card-glow'
-              }`}
-              style={{ animationDelay: `${index * 0.2}s` }}
-            >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-background border border-accent rounded-full px-4 py-2 flex items-center space-x-2">
-                    <Star className="w-4 h-4 text-accent fill-current" />
-                    <span className="text-sm font-medium text-accent">Most Popular</span>
-                  </div>
-                </div>
-              )}
-
-              <div className="text-center mb-8">
-                <h3 className={`text-2xl font-bold mb-2 ${plan.popular ? 'text-white' : 'text-foreground'}`}>
-                  {plan.name}
-                </h3>
-                <p className={`text-sm mb-4 ${plan.popular ? 'text-white/80' : 'text-foreground/70'}`}>
-                  {plan.description}
-                </p>
-                <div className="flex items-baseline justify-center">
-                  <span className={`text-4xl font-bold ${plan.popular ? 'text-white' : 'text-foreground'}`}>
-                    {plan.price}
-                  </span>
-                  <span className={`text-lg ${plan.popular ? 'text-white/80' : 'text-foreground/70'}`}>
-                    {plan.period}
-                  </span>
-                </div>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-center space-x-3">
-                    <Check className={`w-5 h-5 ${plan.popular ? 'text-white' : 'text-accent'}`} />
-                    <span className={`${plan.popular ? 'text-white' : 'text-foreground/80'}`}>
-                      {feature}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                variant={plan.popular ? "outline" : "hero"}
-                size="lg"
-                className={`w-full ${
-                  plan.popular
-                    ? 'bg-white text-accent hover:bg-white/90'
-                    : ''
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          {plans.map((plan, index) => {
+            const IconComponent = plan.icon;
+            return (
+              <Card 
+                key={index} 
+                className={`relative animate-fade-in hover-scale ${
+                  plan.popular 
+                    ? 'border-accent shadow-card-glow scale-105' 
+                    : 'border-border'
                 }`}
               >
-                Get Started
-              </Button>
-            </div>
-          ))}
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-accent-gradient text-white px-4 py-1 rounded-full text-sm font-medium">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+                
+                <CardHeader className="text-center pb-8">
+                  <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <IconComponent className="w-6 h-6 text-accent" />
+                  </div>
+                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <CardDescription className="text-base">{plan.description}</CardDescription>
+                  <div className="pt-4">
+                    <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="text-foreground/70">{plan.period}</span>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="space-y-6">
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                        <span className="text-foreground/80">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button 
+                    variant={plan.buttonVariant} 
+                    size="lg" 
+                    className="w-full"
+                  >
+                    {plan.buttonText}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        <div className="text-center mt-12 animate-fade-in">
+          <p className="text-foreground/70 mb-4">
+            All plans include a 14-day free trial. No credit card required.
+          </p>
+          <p className="text-sm text-foreground/60">
+            Need a custom plan? <a href="#contact" className="text-accent hover:underline">Contact our sales team</a>
+          </p>
         </div>
       </div>
     </section>

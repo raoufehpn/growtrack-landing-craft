@@ -1,8 +1,11 @@
 
 import React from 'react';
 import { Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Footer = () => {
+  const navigate = useNavigate();
+
   return (
     <footer className="bg-card border-t border-border">
       <div className="container mx-auto px-4 py-12">
@@ -36,8 +39,8 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-foreground/70 hover:text-foreground transition-colors">Features</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-foreground transition-colors">Pricing</a></li>
+              <li><button onClick={() => navigate('/features')} className="text-foreground/70 hover:text-foreground transition-colors">Features</button></li>
+              <li><a href="#pricing" className="text-foreground/70 hover:text-foreground transition-colors">Pricing</a></li>
               <li><a href="#" className="text-foreground/70 hover:text-foreground transition-colors">API</a></li>
               <li><a href="#" className="text-foreground/70 hover:text-foreground transition-colors">Documentation</a></li>
             </ul>
@@ -46,10 +49,10 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Company</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-foreground/70 hover:text-foreground transition-colors">About</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-foreground transition-colors">Blog</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-foreground transition-colors">Careers</a></li>
-              <li><a href="#" className="text-foreground/70 hover:text-foreground transition-colors">Contact</a></li>
+              <li><button onClick={() => navigate('/about')} className="text-foreground/70 hover:text-foreground transition-colors">About</button></li>
+              <li><button onClick={() => navigate('/blog')} className="text-foreground/70 hover:text-foreground transition-colors">Blog</button></li>
+              <li><button onClick={() => navigate('/careers')} className="text-foreground/70 hover:text-foreground transition-colors">Careers</button></li>
+              <li><a href="#contact" className="text-foreground/70 hover:text-foreground transition-colors">Contact</a></li>
             </ul>
           </div>
         </div>
